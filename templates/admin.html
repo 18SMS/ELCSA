@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard de Administración</title>
+        <meta charset="utf-8">
+        <!-- Incluir las bibliotecas de Plotly -->
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!-- Incluir el archivo de estilos CSS -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='admin_styles.css') }}">
+    </head>
+    <body>
+        <h1>Dashboard de Administración</h1>
+    
+        <h2>Filtros</h2>
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="filter-form">
+            {% for var in filter_variables %}
+                <label for="{{ var }}">{{ var }}:</label>
+                <select name="{{ var }}" id="{{ var }}">
+                    <option value="">Todos</option>
+                    {% for option in filter_options[var] %}
+                        <option value="{{ option }}" {% if request.args.get(var) == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+            {% endfor %}
+            <input type="submit" value="Aplicar Filtros">
+        </form>
+    
+        {% if mensaje %}
+            <p><strong>{{ mensaje }}</strong></p>
+        {% else %}
+    
+            <h2>Promedio de Edad</h2>
+            <p>{{ promedio_edad }}</p>
+    
+            <h2>Análisis de Preguntas</h2>
+            {% for grafica in graficas_preguntas %}
+                <div class="grafica">
+                    <h3>{{ grafica.titulo }}</h3>
+                    <div id="grafica_{{ loop.index }}"></div>
+                    <script>
+                        var plot_data = {{ grafica.grafica | safe }};
+                        Plotly.newPlot('grafica_{{ loop.index }}', plot_data.data, plot_data.layout);
+                    </script>
+                </div>
+            {% endfor %}
+    
+            <h2>Tablas de Contingencia y Heatmaps</h2>
+            {% for tabla in tablas_contingencia %}
+                <div class="tabla-contingencia">
+                    <h3>{{ tabla.titulo }}</h3>
+                    {{ tabla.tabla | safe }}
+                    <div id="heatmap_{{ loop.index }}"></div>
+                    <script>
+                        var heatmap_data = {{ tabla.heatmap | safe }};
+                        Plotly.newPlot('heatmap_{{ loop.index }}', heatmap_data.data, heatmap_data.layout);
+                    </script>
+                </div>
+            {% endfor %}
+    
+            <h2>Análisis de Seguridad Alimentaria (ELCSA)</h2>
+            {% if graphJSON_elcsa %}
+                <div class="grafica-elcsa">
+                    <div id="grafica_elcsa"></div>
+                    <script>
+                        var plot_data_elcsa = {{ graphJSON_elcsa | safe }};
+                        Plotly.newPlot('grafica_elcsa', plot_data_elcsa.data, plot_data_elcsa.layout);
+                    </script>
+                </div>
+            {% endif %}
+            <ul>
+                {% for texto in analisis_texto %}
+                    <li>{{ texto }}</li>
+                {% endfor %}
+            </ul>
+    
+        {% endif %}
+    
+    </body>
+    </html>

@@ -1,0 +1,104 @@
+/* Estilos Generales */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Encabezado Principal */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+/* Encabezados de Sección */
+h2 {
+    color: #34495e;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 5px;
+    margin-top: 40px;
+}
+
+/* Estilos del Formulario */
+form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Contenedor de Pregunta */
+.pregunta {
+    margin-bottom: 20px;
+}
+
+/* Etiquetas */
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Campos de Entrada */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Botones de Radio y Checkbox */
+input[type="radio"],
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+/* Etiquetas de Radio y Checkbox */
+.pregunta input[type="radio"] + label,
+.pregunta input[type="checkbox"] + label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+}
+
+/* Preguntas Condicionales */
+.condicional {
+    display: none;
+    margin-left: 20px;
+    padding-left: 15px;
+    border-left: 2px dashed #bdc3c7;
+}
+
+/* Botón de Enviar */
+input[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 20px;
+    margin-top: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+/* Diseño Responsivo */
+@media (max-width: 600px) {
+    body {
+        margin: 10px;
+    }
+    h1, h2 {
+        font-size: 1.5em;
+    }
+    input[type="submit"] {
+        width: 100%;
+    }
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Encuesta</title>
+    <meta charset="utf-8">
+    <style>
+        .condicional {
+            display: none;
+            margin-left: 20px;
+        }
+        .pregunta {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>Encuesta</h1>
+    <form method="post">
+        {% macro render_pregunta(pregunta) %}
+            <div class="pregunta" id="pregunta_{{ pregunta.id }}">
+                <label>{{ pregunta.texto }}</label>
+                {% if pregunta.tipo == 'texto' %}
+                    <input type="text" name="P{{ pregunta.id }}" id="P{{ pregunta.id }}">
+                {% elif pregunta.tipo == 'numero' %}
+                    <input type="number" name="P{{ pregunta.id }}" id="P{{ pregunta.id }}">
+                {% elif pregunta.tipo == 'seleccion' %}
+                    <select name="P{{ pregunta.id }}" id="P{{ pregunta.id }}">
+                        <option value="">Seleccione una opción</option>
+                        {% for opcion in pregunta.opciones %}
+                            <option value="{{ opcion }}">{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                {% elif pregunta.tipo == 'radio' %}
+                    {% for opcion in pregunta.opciones %}
+                        <input type="radio" name="P{{ pregunta.id }}" id="P{{ pregunta.id }}_{{ loop.index }}" value="{{ opcion }}">
+                        <label for="P{{ pregunta.id }}_{{ loop.index }}">{{ opcion }}</label>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if pregunta.condicional %}
+                {% for condicion in pregunta.condicional %}
+                    {% set idx = loop.index0 %}
+                    <div class="condicional" id="condicional_{{ pregunta.id }}_{{ idx }}">
+                        {% if condicion.preguntas %}
+                            {% for subpregunta in condicion.preguntas %}
+                                {{ render_pregunta(subpregunta) }}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endmacro %}
+
+        {% for seccion in preguntas %}
+            <h2>{{ seccion.seccion }}</h2>
+            {% for pregunta in seccion.preguntas %}
+                {{ render_pregunta(pregunta) }}
+            {% endfor %}
+        {% endfor %}
+        <input type="submit" value="Enviar">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var preguntas = {{ preguntas | tojson }};
+            function addEventListeners(pregunta) {
+                if (pregunta.condicional) {
+                    function updateCondicional() {
+                        var respuestaSeleccionada = '';
+                        if (pregunta.tipo == 'seleccion' || pregunta.tipo == 'texto' || pregunta.tipo == 'numero') {
+                            var preguntaElement = document.getElementById('P' + pregunta.id);
+                            respuestaSeleccionada = preguntaElement ? preguntaElement.value : '';
+                        } else if (pregunta.tipo == 'radio') {
+                            var radios = document.getElementsByName('P' + pregunta.id);
+                            for (var i = 0; i < radios.length; i++) {
+                                if (radios[i].checked) {
+                                    respuestaSeleccionada = radios[i].value;
+                                    break;
+                                }
+                            }
+                        }
+
+                        for (var idx = 0; idx < pregunta.condicional.length; idx++) {
+                            var condicion = pregunta.condicional[idx];
+                            var mostrar = false;
+                            var mostrarValor = condicion.mostrar_condicional;
+                            if (respuestaSeleccionada == mostrarValor) {
+                                mostrar = true;
+                            }
+                            var condicionalElement = document.getElementById('condicional_' + pregunta.id + '_' + idx);
+                            if (condicionalElement) {
+                                if (mostrar) {
+                                    condicionalElement.style.display = 'block';
+                                } else {
+                                    condicionalElement.style.display = 'none';
+                                    // Limpiar los campos dentro de la condicional oculta
+                                    var inputs = condicionalElement.querySelectorAll('input, select, textarea');
+                                    for (var i = 0; i < inputs.length; i++) {
+                                        if (inputs[i].type == 'radio' || inputs[i].type == 'checkbox') {
+                                            inputs[i].checked = false;
+                                        } else {
+                                            inputs[i].value = '';
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Añadir event listeners a las subpreguntas
+                            if (condicion.preguntas) {
+                                for (var j = 0; j < condicion.preguntas.length; j++) {
+                                    addEventListeners(condicion.preguntas[j]);
+                                }
+                            }
+                        }
+                    }
+
+                    if (pregunta.tipo == 'seleccion' || pregunta.tipo == 'texto' || pregunta.tipo == 'numero') {
+                        var preguntaElement = document.getElementById('P' + pregunta.id);
+                        if (preguntaElement) {
+                            preguntaElement.addEventListener('change', updateCondicional);
+                        }
+                    } else if (pregunta.tipo == 'radio') {
+                        var radios = document.getElementsByName('P' + pregunta.id);
+                        for (var i = 0; i < radios.length; i++) {
+                            radios[i].addEventListener('change', updateCondicional);
+                        }
+                    }
+                    updateCondicional();
+                }
+            }
+
+            for (var s = 0; s < preguntas.length; s++) {
+                var seccion = preguntas[s];
+                for (var p = 0; p < seccion.preguntas.length; p++) {
+                    addEventListeners(seccion.preguntas[p]);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
