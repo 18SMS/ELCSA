@@ -264,4 +264,4 @@ if __name__ == '__main__':
                                     headers.append(f'P{nested_subpregunta["id"]}')
             writer.writerow(headers)
 
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=os.getenv('PORT', default=5000))
