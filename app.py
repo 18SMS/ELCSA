@@ -5,10 +5,7 @@ import json
 import csv
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
-import matplotlib
 from static.questuestions import preguntas
-matplotlib.use('Agg')
 
 app = Flask(__name__)
 
